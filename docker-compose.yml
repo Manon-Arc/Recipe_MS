@@ -1,0 +1,43 @@
+name: recipes
+
+x-app: &app
+  restart: unless-stopped
+
+services:
+  # --- Database: one per service, no other service connects to it ---
+
+  user-db:
+    image: mongo:8
+    ports: ['${USER_DB_PORT:-27018}:27017']
+    volumes:
+      - user-db:/data/db
+      # Fixtures, run by the image on the first start only (empty volume)
+      - ./apps/user/fixtures:/docker-entrypoint-initdb.d:ro
+
+  # --- Apps ---
+
+  gateway:
+    <<: *app
+    build: { context: ., target: service, args: { APP: gateway } }
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-}
+      USER_GRPC_URL: user:50051
+    ports: ['3000:3000']
+    depends_on: [user]
+
+  user:
+    <<: *app
+    build: { context: ., target: service, args: { APP: user } }
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-}
+      MONGO_URL: mongodb://user-db:27017
+    depends_on: [user-db]
+
+  front:
+    <<: *app
+    build: { context: ., target: front }
+    ports: ['5173:80']
+    depends_on: [gateway]
+
+volumes:
+  user-db:

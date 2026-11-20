@@ -1,0 +1,13 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Apps carry exact versions, shared packages use "*" peer dependencies
+saveExact: true
+engineStrict: true
+
+# Dependencies allowed to run their install scripts
+allowBuilds:
+  # Version check only
+  '@scarf/scarf': set this to true or false
+  protobufjs: false
