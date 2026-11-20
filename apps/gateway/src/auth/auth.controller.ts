@@ -9,18 +9,18 @@ import {
   Req,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import {
   type LoginResponse,
   type User,
   type UserServiceClient,
 } from '@recipes/contracts';
 import { lastValueFrom } from 'rxjs';
- 
+
 import { USER_CLIENT } from '../common/grpc.js';
 import { LoginDto, RegisterDto } from './auth.dto.js';
 import { type AuthenticatedRequest } from './auth.guard.js';
 import { Public } from './public.decorator.js';
-import { ApiBearerAuth } from '@nestjs/swagger';
  
 @Controller()
 export class AuthController implements OnModuleInit {
