@@ -1,16 +1,10 @@
-	import type { HydratedDocument, Model } from 'mongoose';
- 
 import { status } from '@grpc/grpc-js';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  type LoginRequest,
-  type LoginResponse,
-  type RegisterRequest,
-  type User as UserDto,
-} from '@recipes/contracts';
+import * as contracts from '@recipes/contracts';
 import { rpcError } from '@recipes/contracts/grpc';
+import { type HydratedDocument, isValidObjectId, type Model } from 'mongoose';
  
 import { hashPassword, verifyPassword } from './password.js';
 import { TokenService } from './token.service.js';
@@ -27,7 +21,7 @@ export class UserController {
   ) {}
  
   @GrpcMethod('UserService', 'Login')
-  async login({ email, password }: LoginRequest): Promise<LoginResponse> {
+  async login({ email, password }: contracts.LoginRequest): Promise<contracts.LoginResponse> {
     const user = await this.users.findOne({ email: email.toLowerCase() });
     // Same answer for an unknown email and a wrong password: no hint for an attacker
     if (!user || !(await verifyPassword(password, user.passwordHash))) {
@@ -39,7 +33,7 @@ export class UserController {
   }
  
   @GrpcMethod('UserService', 'Register')
-  async register({ email, name, password }: RegisterRequest): Promise<UserDto> {
+  async register({ email, name, password }: contracts.RegisterRequest): Promise<contracts.User> {
     try {
       const user = await this.users.create({
         email,
@@ -55,8 +49,17 @@ export class UserController {
       throw error;
     }
   }
+
+  @GrpcMethod('UserService', 'GetUsers')
+    async getUsers({ ids }: contracts.GetUsersRequest): Promise<contracts.GetUsersResponse> {
+      const users = await this.users.find({
+        _id: { $in: ids.filter((id) => isValidObjectId(id)) },
+      });
+    
+      return { users: users.map((user) => toDto(user)) };
+    }
 }
  
-function toDto(user: HydratedDocument<User>): UserDto {
+function toDto(user: HydratedDocument<User>): contracts.User {
   return { email: user.email, id: user.id, name: user.name };
 }

@@ -5,9 +5,11 @@ import { type ArgumentsHost, Catch, Logger } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
  
 /** gRPC status of the services -> HTTP status of the public API */
-const HTTP_STATUS: Partial<Record<status, number>> = {
+	const HTTP_STATUS: Partial<Record<status, number>> = {
   [status.ALREADY_EXISTS]: 409,
   [status.INVALID_ARGUMENT]: 400,
+  [status.NOT_FOUND]: 404,
+  [status.PERMISSION_DENIED]: 403,
   [status.UNAUTHENTICATED]: 401,
   [status.UNAVAILABLE]: 503,
 };

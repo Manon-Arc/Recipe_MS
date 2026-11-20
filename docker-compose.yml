@@ -29,6 +29,7 @@ services:
     environment:
       JWT_SECRET: ${JWT_SECRET:-}
       USER_GRPC_URL: user:50051
+      RECIPE_GRPC_URL: recipe:50052
     ports: ['3000:3000']
     depends_on: [user]
 
@@ -40,6 +41,14 @@ services:
       MONGO_URL: mongodb://user-db:27017
     depends_on: [user-db]
 
+  recipe:
+    <<: *app
+    build: { context: ., target: service, args: { APP: recipe } }
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-}
+      MONGO_URL: mongodb://recipe-db:27017
+    depends_on: [recipe-db]
+
   front:
     <<: *app
     build: { context: ., target: front }
@@ -48,3 +57,4 @@ services:
 
 volumes:
   user-db:
+  recipe-db:

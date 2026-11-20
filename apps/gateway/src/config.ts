@@ -7,4 +7,5 @@ export const config = {
   jwtSecret: env('JWT_SECRET'),
   port: Number(env('GATEWAY_PORT', '3000')),
   userGrpcUrl: env('USER_GRPC_URL', 'localhost:50051'),
+  recipeGrpcUrl: env('RECIPE_GRPC_URL', 'localhost:50052'),
 };
